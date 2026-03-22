@@ -4,7 +4,7 @@ import {
   buildMissingAnswersPrompt,
   parseGeneratedPaper,
 } from './promptBuilder';
-import { AssessmentJobData } from '../config/queue';
+import { AssessmentJobData } from '../config/queueShared';
 import { IGeneratedPaper } from '../models/Assignment';
 
 const groq = new Groq({

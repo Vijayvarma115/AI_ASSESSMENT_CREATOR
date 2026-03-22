@@ -1,9 +1,8 @@
 import { Queue, QueueEvents } from 'bullmq';
-import { createRedisClient } from './redis';
-import { ASSESSMENT_QUEUE, AssessmentJobData } from './queueShared';
+import { ASSESSMENT_QUEUE, AssessmentJobData, getBullMQConnection } from './queueShared';
 
-const queueConnection = createRedisClient('queue');
-const queueEventsConnection = createRedisClient('queue-events');
+const queueConnection = getBullMQConnection();
+const queueEventsConnection = getBullMQConnection();
 
 export const assessmentQueue = new Queue(ASSESSMENT_QUEUE, {
   connection: queueConnection,

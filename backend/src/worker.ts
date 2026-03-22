@@ -1,8 +1,8 @@
 import 'dotenv/config';
 import { Worker, Job } from 'bullmq';
 import mongoose from 'mongoose';
-import { redis, createRedisClient } from './config/redis';
-import { ASSESSMENT_QUEUE, AssessmentJobData } from './config/queueShared';
+import { redis } from './config/redis';
+import { ASSESSMENT_QUEUE, AssessmentJobData, getBullMQConnection } from './config/queueShared';
 import { Assignment } from './models/Assignment';
 import { generateAssessment } from './services/groqService';
 import { setCache } from './config/redis';
@@ -108,7 +108,7 @@ async function processAssessmentJob(job: Job<AssessmentJobData>) {
 
 export async function startWorker() {
   await connectDB();
-  const workerConnection = createRedisClient('worker');
+  const workerConnection = getBullMQConnection();
 
   const worker = new Worker<AssessmentJobData>(
     ASSESSMENT_QUEUE,
