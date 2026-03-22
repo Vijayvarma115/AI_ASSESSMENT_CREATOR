@@ -16,6 +16,9 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ai-ass
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const RUN_WORKER_IN_API = process.env.RUN_WORKER_IN_API === 'true';
 
+let mongoConnected = false;
+let workerStartedInApi = false;
+
 // Middleware
 app.use(cors({
   origin: [FRONTEND_URL, 'http://localhost:3000', 'http://localhost:3001'],
@@ -29,9 +32,12 @@ app.use('/api/assignments', assignmentRoutes);
 
 app.get('/health', (_req, res) => {
   res.json({
-    status: 'ok',
+    status: mongoConnected ? 'ok' : 'degraded',
     timestamp: new Date().toISOString(),
     wsClients: wsManager.getClientCount(),
+    dependencies: {
+      mongodb: mongoConnected ? 'connected' : 'disconnected',
+    },
   });
 });
 
@@ -55,25 +61,34 @@ redisSubscriber.on('message', (_channel: string, message: string) => {
   }
 });
 
-// Database connection & server start
-async function bootstrap() {
-  try {
-    await mongoose.connect(MONGODB_URI);
-    console.log('✅ MongoDB connected');
+async function connectMongoWithRetry(retryDelayMs = 5000) {
+  while (!mongoConnected) {
+    try {
+      await mongoose.connect(MONGODB_URI);
+      mongoConnected = true;
+      console.log('✅ MongoDB connected');
 
-    if (RUN_WORKER_IN_API) {
-      await startWorker();
-      console.log('✅ Worker started in API process');
+      if (RUN_WORKER_IN_API && !workerStartedInApi) {
+        await startWorker();
+        workerStartedInApi = true;
+        console.log('✅ Worker started in API process');
+      }
+    } catch (err) {
+      console.error('MongoDB connection failed, retrying...', err);
+      await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
     }
-
-    server.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-      console.log(`🔌 WebSocket available at ws://localhost:${PORT}/ws`);
-    });
-  } catch (err) {
-    console.error('Bootstrap error:', err);
-    process.exit(1);
   }
+}
+
+// Server start
+function bootstrap() {
+  server.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`🔌 WebSocket available at ws://localhost:${PORT}/ws`);
+  });
+
+  // Keep process alive and retry DB until connected.
+  void connectMongoWithRetry();
 }
 
 process.on('SIGTERM', async () => {
