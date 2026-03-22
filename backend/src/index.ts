@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import { redis, redisSubscriber } from './config/redis';
 import { wsManager } from './config/websocket';
 import assignmentRoutes from './routes/assignments';
+import { startWorker } from './worker';
 
 const app = express();
 const server = http.createServer(app);
@@ -13,6 +14,7 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 4000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ai-assessment';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const RUN_WORKER_IN_API = process.env.RUN_WORKER_IN_API === 'true';
 
 // Middleware
 app.use(cors({
@@ -58,6 +60,11 @@ async function bootstrap() {
   try {
     await mongoose.connect(MONGODB_URI);
     console.log('✅ MongoDB connected');
+
+    if (RUN_WORKER_IN_API) {
+      await startWorker();
+      console.log('✅ Worker started in API process');
+    }
 
     server.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);

@@ -10,6 +10,11 @@ import { setCache } from './config/redis';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ai-assessment';
 
 async function connectDB() {
+  if (mongoose.connection.readyState === 1) {
+    console.log('✅ Worker: MongoDB already connected');
+    return;
+  }
+
   await mongoose.connect(MONGODB_URI);
   console.log('✅ Worker: MongoDB connected');
 }
@@ -101,7 +106,7 @@ async function processAssessmentJob(job: Job<AssessmentJobData>) {
   return { assignmentId, status: 'completed' };
 }
 
-async function startWorker() {
+export async function startWorker() {
   await connectDB();
   const workerConnection = createRedisClient('worker');
 
@@ -142,6 +147,10 @@ async function startWorker() {
   });
 
   console.log('🚀 Worker started, waiting for jobs...');
+
+  return worker;
 }
 
-startWorker().catch(console.error);
+if (require.main === module) {
+  startWorker().catch(console.error);
+}
