@@ -7,8 +7,8 @@ import {
   BookOpen, Calendar, FileText, Hash, Star, Sliders, Upload, X,
   ChevronRight, Loader2, AlertCircle, Lightbulb
 } from 'lucide-react';
-import { useAssignmentStore } from '../../store/assignmentStore';
-import { createAssignment } from '../../lib/api';
+import { useAssignmentStore } from '../store/assignmentStore';
+import { createAssignment } from '../lib/api';
 
 const QUESTION_TYPES = [
   { id: 'mcq', label: 'Multiple Choice', desc: 'MCQ with 4 options', color: 'bg-blue-50 border-blue-200 text-blue-800' },

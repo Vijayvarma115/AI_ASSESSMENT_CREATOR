@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BookOpen, LayoutDashboard, PlusCircle, Wifi, WifiOff } from 'lucide-react';
-import { useAssignmentStore } from '../../store/assignmentStore';
+import { useAssignmentStore } from '../store/assignmentStore';
 
 export default function Navbar() {
   const pathname = usePathname();

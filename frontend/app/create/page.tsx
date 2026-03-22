@@ -90,7 +90,7 @@ export default function CreateAssignmentPage() {
         'True/False Questions': 'true_false',
         'Fill in the Blanks': 'fill_blank',
       };
-      const questionTypes = [...new Set(rows.map(r => typeMap[r.type] || 'short_answer'))];
+      const questionTypes = Array.from(new Set(rows.map(r => typeMap[r.type] || 'short_answer')));
 
       const result = await createAssignment({
         title: assignmentTitle,

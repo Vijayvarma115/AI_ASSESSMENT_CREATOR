@@ -3,9 +3,9 @@
 import { useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, CheckCircle, XCircle, Sparkles, Brain, FileCheck, Zap } from 'lucide-react';
-import { useAssignmentStore } from '../../store/assignmentStore';
-import { useWebSocket } from '../../hooks/useWebSocket';
-import { getAssignment } from '../../lib/api';
+import { useAssignmentStore } from '../store/assignmentStore';
+import { useWebSocket } from '../hooks/useWebSocket';
+import { getAssignment } from '../lib/api';
 
 const STEPS = [
   { icon: Brain, label: 'Analyzing requirements', threshold: 0 },
