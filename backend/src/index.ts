@@ -45,10 +45,17 @@ app.get('/health', (_req, res) => {
 wsManager.initialize(server);
 
 // Redis Pub/Sub - bridge Redis messages to WebSocket clients
-redisSubscriber.subscribe('assignment-updates', (err) => {
-  if (err) console.error('Redis subscribe error:', err);
-  else console.log('✅ Subscribed to assignment-updates channel');
-});
+async function subscribeToAssignmentUpdates(retryDelayMs = 5000) {
+  try {
+    await redisSubscriber.subscribe('assignment-updates');
+    console.log('✅ Subscribed to assignment-updates channel');
+  } catch (err) {
+    console.error('Redis subscribe failed, retrying...', err);
+    setTimeout(() => {
+      void subscribeToAssignmentUpdates(retryDelayMs);
+    }, retryDelayMs);
+  }
+}
 
 redisSubscriber.on('message', (_channel: string, message: string) => {
   try {
@@ -86,6 +93,8 @@ function bootstrap() {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
     console.log(`🔌 WebSocket available at ws://localhost:${PORT}/ws`);
   });
+
+  void subscribeToAssignmentUpdates();
 
   // Keep process alive and retry DB until connected.
   void connectMongoWithRetry();
