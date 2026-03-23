@@ -1,6 +1,7 @@
 import { AssignmentFormData, Assignment, GeneratedPaper } from '../store/assignmentStore';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+// Backend URL - hardcoded for production, can be overridden via NEXT_PUBLIC_API_URL env var
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://terrific-commitment-production-ac89.up.railway.app';
 
 export interface CreateAssignmentResponse {
   success: boolean;

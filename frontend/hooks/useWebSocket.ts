@@ -1,7 +1,8 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useAssignmentStore } from '../store/assignmentStore';
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:4000/ws';
+// WebSocket URL - hardcoded for production, can be overridden via NEXT_PUBLIC_WS_URL env var
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'wss://terrific-commitment-production-ac89.up.railway.app/ws';
 const RECONNECT_DELAY = 3000;
 const MAX_RECONNECT_ATTEMPTS = 10;
 
