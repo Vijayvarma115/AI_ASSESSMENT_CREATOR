@@ -11,7 +11,8 @@ import { startWorker } from './worker';
 const app = express();
 const server = http.createServer(app);
 
-const PORT = process.env.PORT || 4000;
+const PORT = Number(process.env.PORT || 4000);
+const HOST = process.env.HOST || '0.0.0.0';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ai-assessment';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const RUN_WORKER_IN_API = process.env.RUN_WORKER_IN_API === 'true';
@@ -32,6 +33,7 @@ app.use('/api/assignments', assignmentRoutes);
 
 app.get('/health', (_req, res) => {
   res.json({
+    ok: true,
     status: mongoConnected ? 'ok' : 'degraded',
     timestamp: new Date().toISOString(),
     wsClients: wsManager.getClientCount(),
@@ -39,6 +41,10 @@ app.get('/health', (_req, res) => {
       mongodb: mongoConnected ? 'connected' : 'disconnected',
     },
   });
+});
+
+app.get('/', (_req, res) => {
+  res.status(200).send('AI Assessment Backend is running');
 });
 
 // WebSocket setup
@@ -89,9 +95,9 @@ async function connectMongoWithRetry(retryDelayMs = 5000) {
 
 // Server start
 function bootstrap() {
-  server.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`🔌 WebSocket available at ws://localhost:${PORT}/ws`);
+  server.listen(PORT, HOST, () => {
+    console.log(`🚀 Server running on http://${HOST}:${PORT}`);
+    console.log(`🔌 WebSocket available at ws://${HOST}:${PORT}/ws`);
   });
 
   void subscribeToAssignmentUpdates();
