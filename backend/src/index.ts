@@ -16,15 +16,36 @@ const HOST = process.env.HOST || '0.0.0.0';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ai-assessment';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const RUN_WORKER_IN_API = process.env.RUN_WORKER_IN_API === 'true';
+const normalizeOrigin = (origin: string) => origin.replace(/\/+$/, '');
+const allowedOrigins = new Set([
+  normalizeOrigin(FRONTEND_URL),
+  'http://localhost:3000',
+  'http://localhost:3001',
+]);
 
 let mongoConnected = false;
 let workerStartedInApi = false;
 
 // Middleware
-app.use(cors({
-  origin: [FRONTEND_URL, 'http://localhost:3000', 'http://localhost:3001'],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow server-to-server and health checks with no Origin header.
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      if (allowedOrigins.has(normalizeOrigin(origin))) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
