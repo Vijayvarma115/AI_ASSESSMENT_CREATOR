@@ -28,3 +28,11 @@ queueEvents.on('completed', ({ jobId }) => {
 queueEvents.on('failed', ({ jobId, failedReason }) => {
   console.error(`❌ Job ${jobId} failed:`, failedReason);
 });
+
+queueEvents.on('error', (err) => {
+  console.error('❌ QueueEvents error:', err);
+});
+
+assessmentQueue.on('error', (err) => {
+  console.error('❌ Queue error:', err);
+});
